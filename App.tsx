@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {Text, View} from 'react-native-ui-lib';
-import {SafeAreaView} from 'react-native';
+import {SafeAreaView, ActivityIndicator} from 'react-native';
 import {Movie, createApiClient} from './src/api';
 import Card from './src/components/Card';
 import Badge from './src/components/Badge';
@@ -39,9 +39,13 @@ export default class App extends React.Component<{}, AppContext> {
   fetchData = async () => {
     const {results, total_results} = await api.getMovies();
     this.setState({
-      movies: results,
+      movies: results.slice(0, 10),
     });
   };
+
+  componentDidUpdate(_: {}, previousState) {
+    console.log(this.state.selectedMovies);
+  }
 
   selectMovie = (movie: Movie) => {
     const {selectedMovies} = this.state;
@@ -56,15 +60,16 @@ export default class App extends React.Component<{}, AppContext> {
     return (
       <>
         <MyContext.Provider value={this.state}>
-          <SafeAreaView flex>
+          <SafeAreaView>
             {movies.length ? (
-              <Card
-                bg-$backgroundDefault
-                movie={movies[1]}
-                selectMovie={this.selectMovie}
-              />
+              // <Card
+              //   bg-$backgroundDefault
+              //   movie={movies[1]}
+              //   selectMovie={this.selectMovie}
+              // />
+              <Carousel />
             ) : (
-              <Text>Helo</Text>
+              <ActivityIndicator size="large" />
             )}
           </SafeAreaView>
         </MyContext.Provider>

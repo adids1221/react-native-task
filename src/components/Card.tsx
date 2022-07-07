@@ -5,19 +5,23 @@ import Content from './Content';
 import {MyContext, AppContext} from '../../App';
 
 function Card({movie, selectMovie}: {movie: Movie; selectMovie: Function}) {
-  const {movies} = React.useContext(MyContext) as AppContext;
   const posterURL = `https://image.tmdb.org/t/p/original${movie.poster_path}`;
   const {original_title, overview, vote_average, release_date} = movie;
+
   return (
-    <View center>
+    <View marginT-10>
       <View
         style={{
           backgroundColor: Colors.grey70,
           borderRadius: 20,
           overflow: 'hidden',
-        }}>
+        }}
+        center
+        marginT-20
+        marginL-35
+        marginR-35>
         <View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => selectMovie(movie)}>
             <Image
               source={{uri: posterURL}}
               cover={true}
