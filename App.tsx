@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
+import React from 'react';
 import {ActivityIndicator, ScrollView, StyleSheet} from 'react-native';
-import {View, Button, Colors} from 'react-native-ui-lib';
+import {View} from 'react-native-ui-lib';
 import {Movie, createApiClient} from './src/api';
 import Carousel from './src/components/Carousel';
 import _ from 'lodash';
@@ -71,7 +71,11 @@ export default class App extends React.Component<{}, AppContext> {
               <>
                 <Carousel items={movies} onPress={this.selectMovie} />
 
-                <Stack items={selectedMovies} imageStyle={styles.stackImage} />
+                <Stack
+                  items={selectedMovies}
+                  onPress={this.selectMovie}
+                  imageStyle={styles.stackImage}
+                />
               </>
             ) : (
               <ActivityIndicator

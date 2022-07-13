@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Colors, Constants} from 'react-native-ui-lib';
+import {View, Colors, Constants, Button} from 'react-native-ui-lib';
 import {FlatList, StyleSheet, StyleProp, ViewStyle} from 'react-native';
 import Card from './Card';
 import Content from './Content';
@@ -26,13 +26,10 @@ function Carousel({
   return (
     <FlatList
       data={items}
+      contentContainerStyle={{alignItems: 'flex-start'}}
       renderItem={({item: movie}) => {
         return (
-          <View
-            style={[styles.conatiner, styles.shadowProp]}
-            center
-            marginT-30
-            marginH-40>
+          <View style={[styles.conatiner]} center marginT-30 marginH-40>
             <Card
               key={movie.id}
               customeObject={movie}
@@ -44,6 +41,7 @@ function Carousel({
                   overview={movie.overview}
                   release_date={movie.release_date}
                   vote_average={movie.vote_average}
+                  style={styles.contentContainer}
                 />
               }
               imageStyle={styles.cardImage}
@@ -68,19 +66,18 @@ const styles = StyleSheet.create({
   shadowProp: {
     shadowColor: '#171717',
     shadowOffset: {width: -2, height: 4},
-    shadowOpacity: 0.7,
+    shadowOpacity: 10,
     shadowRadius: 3,
   },
   conatiner: {
     backgroundColor: Colors.grey70,
-    shadowColor: Colors.grey20,
-    shadowOffset: {width: -2, height: 4},
-    shadowOpacity: 0.4,
-    shadowRadius: 3,
-    borderWidth: 1,
+    borderWidth: 0.3,
     borderRadius: 20,
     overflow: 'hidden',
-    alignItems: 'stretch',
+  },
+  contentContainer: {
+    width: 250,
+    margin: 10,
   },
 });
 

@@ -30,7 +30,6 @@ function Stack({
   imageStyle,
   textstyle,
   customElement,
-
   customeObject,
 }: StackProps) {
   let {selectedMoviesNumber} = React.useContext(MyContext) as AppContext;
@@ -61,7 +60,6 @@ function Stack({
       {selectedMoviesNumber ? (
         lastThreeMovies.map((movie, index) => {
           let offset = 15 * -(lastThreeMovies.length - 1 - index);
-          // badgePosition = offset;
           return (
             <Card
               containerStyle={[
@@ -76,6 +74,7 @@ function Stack({
               ]}
               imageStyle={styles.cardImage}
               image={movie.poster_path}
+              animationFlag={true}
               key={movie.id}
             />
           );
@@ -89,6 +88,7 @@ function Stack({
             left: 0,
             bottom: 0,
           }}
+          animationFlag={false}
           imageStyle={styles.cardImage}
         />
       )}
@@ -125,13 +125,13 @@ const styles = StyleSheet.create({
     shadowColor: '#171717',
     shadowOffset: {width: -2, height: 4},
     shadowOpacity: 0.7,
-    shadowRadius: 3,
+    shadowRadius: 10,
   },
   badgeStyle: {
     position: 'absolute',
     backgroundColor: Colors.red40,
     borderRadius: 999,
-    borderWidth: 0.15,
+    borderWidth: 0.17,
     width: 25,
     height: 25,
   },
