@@ -5,8 +5,18 @@ import {
   Button,
   Colors,
   Assets,
+  Image,
+  View,
 } from 'react-native-ui-lib';
 import {MyContext, AppContext} from '../../App';
+
+interface ContentProps {
+  title;
+  text;
+  onPress;
+  style;
+  customElement;
+}
 
 function Content({
   original_title,
@@ -32,34 +42,33 @@ function Content({
 
   return (
     <>
-      <TouchableOpacity>
-        <Text text40L purple30 center>
-          {original_title}
+      <Text text50L purple30 center numberOfLines={textShown ? undefined : 1}>
+        {original_title}
+      </Text>
+      <Text
+        text80
+        margin-10
+        numberOfLines={textShown ? undefined : 2}
+        onTextLayout={onTextLayout}>
+        <Text center>{overview}</Text>
+        {'\n'}
+        <Text center marginT-5>
+          Release Date: {release_date}
         </Text>
-        <Text
-          text80
-          margin-10
-          numberOfLines={textShown ? undefined : 2}
-          onTextLayout={onTextLayout}>
-          <Text center>{overview}</Text>
-          {'\n'}
-          <Text center marginT-5>
-            Release Date: {release_date}
-          </Text>
-          {'\n'}
-          <Text center>Score: {vote_average}</Text>
+        {'\n'}
+        <Text center marginT-5>
+          Score: {vote_average}
         </Text>
-
-        <Button
-          onPress={toggleNumberOfLines}
-          center
-          marginT-6
-          label={textShown ? 'Read less' : 'Read more'}
-          size={Button.sizes.medium}
-          backgroundColor={Colors.red40}
-          enableShadow
-        />
-      </TouchableOpacity>
+      </Text>
+      <Button
+        onPress={toggleNumberOfLines}
+        center
+        marginT-6
+        label={textShown ? 'Read less' : 'Read more'}
+        size={Button.sizes.medium}
+        backgroundColor={Colors.red40}
+        enableShadow
+      />
     </>
   );
 }

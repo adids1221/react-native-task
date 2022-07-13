@@ -1,10 +1,9 @@
 import React, {Component} from 'react';
-import {Text, View} from 'react-native-ui-lib';
-import {SafeAreaView, ActivityIndicator} from 'react-native';
+import {ActivityIndicator, ScrollView, StyleSheet} from 'react-native';
+import {View, Button, Colors} from 'react-native-ui-lib';
 import {Movie, createApiClient} from './src/api';
-import Card from './src/components/Card';
-import Badge from './src/components/Badge';
 import Carousel from './src/components/Carousel';
+import _ from 'lodash';
 import Stack from './src/components/Stack';
 
 const api = createApiClient();
@@ -14,7 +13,6 @@ export type AppContext = {
   selectedMovies: Movie[];
   selectedMoviesNumber: number;
   stackSize: number;
-  selectMovie?: (movie: Movie) => void;
 };
 
 export const MyContext = React.createContext<AppContext | undefined>(undefined);
@@ -28,12 +26,7 @@ export default class App extends React.Component<{}, AppContext> {
   };
 
   async componentDidMount() {
-    //fetch the data
     this.fetchData();
-    this.setState({
-      selectMovie: this.selectMovie,
-    });
-    //check the selected movies and update the stack and etc...
   }
 
   fetchData = async () => {
@@ -43,14 +36,27 @@ export default class App extends React.Component<{}, AppContext> {
     });
   };
 
-  componentDidUpdate(_: {}, previousState) {
-    console.log(this.state.selectedMovies);
-  }
+  componentDidUpdate(_: {}, previousState) {}
 
   selectMovie = (movie: Movie) => {
-    const {selectedMovies} = this.state;
+    const movieId = movie.id;
+    let {selectedMovies} = this.state;
+    if (_.findIndex(selectedMovies, movie => movie.id === movieId) != -1) {
+      selectedMovies = _.filter(selectedMovies, movie => movie.id != movieId);
+    } else {
+      selectedMovies.push(movie);
+    }
     this.setState({
-      selectedMovies: [...selectedMovies, movie],
+      selectedMovies: selectedMovies,
+      selectedMoviesNumber: selectedMovies.length,
+    });
+    // console.log(selectedMovies);
+  };
+
+  clearSelectedMovies = () => {
+    this.setState({
+      selectedMovies: [],
+      selectedMoviesNumber: 0,
     });
   };
 
@@ -58,22 +64,31 @@ export default class App extends React.Component<{}, AppContext> {
     const {movies, selectedMovies, selectedMoviesNumber, stackSize} =
       this.state;
     return (
-      <>
+      <View flex useSafeArea>
         <MyContext.Provider value={this.state}>
-          <SafeAreaView>
+          <ScrollView>
             {movies.length ? (
-              // <Card
-              //   bg-$backgroundDefault
-              //   movie={movies[1]}
-              //   selectMovie={this.selectMovie}
-              // />
-              <Carousel />
+              <>
+                <Carousel items={movies} onPress={this.selectMovie} />
+
+                <Stack items={selectedMovies} imageStyle={styles.stackImage} />
+              </>
             ) : (
-              <ActivityIndicator size="large" />
+              <ActivityIndicator
+                size="large"
+                style={{justifyContent: 'center'}}
+              />
             )}
-          </SafeAreaView>
+          </ScrollView>
         </MyContext.Provider>
-      </>
+      </View>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  stackImage: {
+    width: 120,
+    height: 120,
+  },
+});

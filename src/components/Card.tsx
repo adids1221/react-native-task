@@ -1,50 +1,71 @@
-import React from 'react';
-import {Text, TouchableOpacity, View, Image, Colors} from 'react-native-ui-lib';
-import {Movie} from '../api';
-import Content from './Content';
-import {MyContext, AppContext} from '../../App';
+import React, {useState, useEffect, ReactElement, useRef} from 'react';
+import {
+  StyleSheet,
+  StyleProp,
+  ViewStyle,
+  ImageStyle,
+  TextStyle,
+} from 'react-native';
+import {TouchableOpacity, View, Image, Colors} from 'react-native-ui-lib';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+} from 'react-native-reanimated';
 
-function Card({movie, selectMovie}: {movie: Movie; selectMovie: Function}) {
-  const posterURL = `https://image.tmdb.org/t/p/original${movie.poster_path}`;
-  const {original_title, overview, vote_average, release_date} = movie;
+interface CardProps {
+  image?: string;
+  text?: string;
+  onPress?: Function;
+  seconderyOnPress?: Function;
+  containerStyle?: StyleProp<ViewStyle>;
+  imageStyle?: StyleProp<ImageStyle>;
+  textStyle?: StyleProp<TextStyle>;
+  customElement?: ReactElement;
+  customeObject?: Object;
+}
+
+function Card({
+  image,
+  text,
+  onPress,
+  containerStyle,
+  imageStyle,
+  textStyle,
+  customElement,
+  customeObject,
+}: CardProps) {
+  const posterURL = `https://image.tmdb.org/t/p/original${image}`;
+  const [isSelected, setIsSelected] = useState(false);
+  //Avoid useEffect hook on initial render
+  const didMount = useRef(false);
+
+  useEffect(() => {
+    if (didMount.current) {
+      onPress?.(customeObject);
+    } else {
+      didMount.current = true;
+    }
+  }, [isSelected]);
 
   return (
-    <View marginT-10>
-      <View
-        style={{
-          backgroundColor: Colors.grey70,
-          borderRadius: 20,
-          overflow: 'hidden',
-        }}
-        center
-        marginT-20
-        marginL-35
-        marginR-35>
-        <View>
-          <TouchableOpacity onPress={() => selectMovie(movie)}>
-            <Image
-              source={{uri: posterURL}}
-              cover={true}
-              width={155}
-              height={155}
-            />
-          </TouchableOpacity>
-        </View>
-        <View
-          style={{
-            padding: 10,
-            width: 300,
-          }}>
-          <Content
-            original_title={original_title}
-            overview={overview}
-            release_date={release_date}
-            vote_average={vote_average}
-          />
-        </View>
-      </View>
+    <View style={containerStyle} center flex>
+      {onPress ? (
+        <TouchableOpacity onPress={() => setIsSelected(!isSelected)}>
+          <Image source={{uri: posterURL}} cover={true} style={imageStyle} />
+        </TouchableOpacity>
+      ) : (
+        <Image source={{uri: posterURL}} style={imageStyle} />
+      )}
+      <View style={styles.contentContainer}>{customElement}</View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  contentContainer: {
+    width: 250,
+    margin: 10,
+  },
+});
 
 export default Card;
