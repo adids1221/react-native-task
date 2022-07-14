@@ -1,6 +1,6 @@
 import React from 'react';
 import {ActivityIndicator, ScrollView, StyleSheet} from 'react-native';
-import {View} from 'react-native-ui-lib';
+import {Button, View} from 'react-native-ui-lib';
 import {Movie, createApiClient} from './src/api';
 import Carousel from './src/components/Carousel';
 import _ from 'lodash';
@@ -13,6 +13,10 @@ export type AppContext = {
   selectedMovies: Movie[];
   selectedMoviesNumber: number;
   stackSize: number;
+  totalResults: number;
+  totalPages: number;
+  currResults: number;
+  currPage: number;
 };
 
 export const MyContext = React.createContext<AppContext | undefined>(undefined);
@@ -23,6 +27,10 @@ export default class App extends React.Component<{}, AppContext> {
     selectedMovies: [],
     selectedMoviesNumber: 0,
     stackSize: 0,
+    totalResults: 0,
+    totalPages: 0,
+    currResults: 0,
+    currPage: 0,
   };
 
   async componentDidMount() {
@@ -30,10 +38,42 @@ export default class App extends React.Component<{}, AppContext> {
   }
 
   fetchData = async () => {
-    const {results, total_results} = await api.getMovies();
+    const {results, total_results, total_pages} = await api.getMovies();
+    // console.log(
+    //   `total res: ${total_results} || res len: ${results.length} || total pages: ${total_pages}`,
+    // );
+    let {currResults} = this.state;
     this.setState({
-      movies: results.slice(0, 10),
+      totalResults: total_results,
+      totalPages: total_pages,
+      movies: results.slice(0, currResults + results.length),
+      currResults: currResults + results.length,
+      currPage: 1,
     });
+    // console.log(this.state.movies.length);
+  };
+
+  loadMoreDate = async () => {
+    let {movies, currResults, currPage, totalPages, totalResults} = this.state;
+    if (currResults < totalResults && currPage < totalPages) {
+      const {results, total_results} = await api.getMovies(currPage + 1);
+      if (total_results != totalResults) {
+        totalResults = total_results;
+      }
+      const enrichmentMovies: any = results;
+      movies = [...movies, ...enrichmentMovies];
+      // console.log(
+      //   `movies len: ${movies.length} || res len: ${
+      //     results.length
+      //   } || page: ${currPage + 1}`,
+      // );
+      this.setState({
+        totalResults: totalResults,
+        movies: movies,
+        currResults: currResults + results.length,
+        currPage: currPage + 1,
+      });
+    }
   };
 
   componentDidUpdate(_: {}, previousState) {}
@@ -50,7 +90,6 @@ export default class App extends React.Component<{}, AppContext> {
       selectedMovies: selectedMovies,
       selectedMoviesNumber: selectedMovies.length,
     });
-    // console.log(selectedMovies);
   };
 
   clearSelectedMovies = () => {
@@ -69,7 +108,11 @@ export default class App extends React.Component<{}, AppContext> {
           <ScrollView>
             {movies.length ? (
               <>
-                <Carousel items={movies} onPress={this.selectMovie} />
+                <Carousel
+                  items={movies}
+                  onPress={this.selectMovie}
+                  onEndReached={this.loadMoreDate}
+                />
 
                 <Stack
                   items={selectedMovies}

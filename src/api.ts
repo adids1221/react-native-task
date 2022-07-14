@@ -28,9 +28,8 @@ type MoviesResponse = {
 };
 
 export type ApiClient = {
-    getMovies: (
+    getMovies: (page?: number
     ) => Promise<MoviesResponse>;
-    // getGenre: (genreId: string, apiKey: string) => Promise<Genre>;
 };
 
 const api_key = '9f5bfb9e46dc9d29842c84653c92251f'
@@ -41,9 +40,9 @@ const appAxios = axios.create({
 
 export const createApiClient = (): ApiClient => {
     return {
-        getMovies: (
+        getMovies: (page?: number
         ) => {
-            return appAxios.get(`/movie/upcoming`, { params: { api_key } }).then((res) => res.data)
+            return appAxios.get(`/movie/upcoming`, { params: { api_key, page: (page ? page : {}) } }).then((res) => res.data)
         }
     }
 }

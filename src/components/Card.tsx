@@ -18,6 +18,7 @@ import Animated, {
   FadeIn,
 } from 'react-native-reanimated';
 import {selectedIcon} from '../assets/index';
+import {MyContext, AppContext} from '../../App';
 
 interface CardProps {
   image?: string;
@@ -44,6 +45,7 @@ function Card({
 }: CardProps) {
   const posterURL = `https://image.tmdb.org/t/p/original${image}`;
   const [isSelected, setIsSelected] = useState(false);
+
   //Avoid useEffect hook on initial render
   const didMount = useRef(false);
   const selectedOverlay = (
