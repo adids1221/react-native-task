@@ -9,7 +9,8 @@ import {
 } from 'react-native';
 import Card from './Card';
 import Badge from './Badge';
-import {MyContext, AppContext} from '../../App';
+import {MyContext, AppContext, MyMovie} from '../../App';
+import {Movie} from '../api';
 
 interface StackProps {
   items?: Array<any>;
@@ -33,81 +34,62 @@ function Stack({
   customeObject,
 }: StackProps) {
   let {selectedMoviesNumber} = React.useContext(MyContext) as AppContext;
-
-  const [offsetX, setOffsetX] = useState(0);
-  const [offsetY, setOffsetY] = useState(0);
-  const [deltaOffset, setDeltaOffset] = useState(0);
-
   let selectedMoviesLen: number;
   let lastThreeMovies: Array<any> = [];
   let badgePosition = 15;
-
   if (items) {
     selectedMoviesLen = items.length;
     lastThreeMovies = items.slice(
-      selectedMoviesLen - (selectedMoviesNumber > 3 ? 3 : selectedMoviesNumber),
-      selectedMoviesLen,
+      selectedMoviesLen > 3 ? -3 : -selectedMoviesLen,
     );
   }
 
-  useEffect(() => {
-    setOffsetX(offsetX + deltaOffset);
-    setOffsetY(offsetY + deltaOffset);
-  }, [deltaOffset]);
+  const renderCard = (movie?: MyMovie, offset?: number) => {
+    return (
+      <Card
+        containerStyle={[
+          styles.shadowProp,
+          {
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            left: movie ? offset : 0,
+            bottom: movie ? offset : 0,
+          },
+        ]}
+        cover={false}
+        imageStyle={styles.cardImage}
+        image={movie && movie.poster_path}
+        animationFlag={movie ? true : false}
+        key={movie && movie.id}
+      />
+    );
+  };
 
   return (
     <View flex marginT-100 height={240}>
       {selectedMoviesNumber ? (
-        lastThreeMovies.map((movie, index) => {
-          let offset = 15 * -(lastThreeMovies.length - 1 - index);
-          return (
-            <Card
-              containerStyle={[
-                styles.shadowProp,
-                {
-                  position: 'absolute',
-                  right: 0,
-                  top: 0,
-                  left: offset,
-                  bottom: offset,
-                },
-              ]}
-              imageStyle={styles.cardImage}
-              image={movie.poster_path}
-              animationFlag={true}
-              key={movie.id}
-            />
-          );
-        })
+        <>
+          {lastThreeMovies.map((movie, index) => {
+            let offset = 15 * -(lastThreeMovies.length - 1 - index);
+            return renderCard(movie, offset);
+          })}
+          <Badge
+            text={`${selectedMoviesNumber}`}
+            textStyle={styles.badgeTextStyle}
+            containerStyle={[
+              styles.badgeStyle,
+              styles.shadowProp,
+              {
+                right: badgePosition + 100,
+                top: badgePosition + 10,
+              },
+            ]}
+          />
+        </>
       ) : (
-        <Card
-          containerStyle={{
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            left: 0,
-            bottom: 0,
-          }}
-          animationFlag={false}
-          imageStyle={styles.cardImage}
-        />
+        renderCard()
       )}
-
-      {selectedMoviesNumber ? (
-        <Badge
-          text={`${selectedMoviesNumber}`}
-          textStyle={styles.badgeTextStyle}
-          containerStyle={[
-            styles.badgeStyle,
-            styles.shadowProp,
-            {
-              right: badgePosition + 100,
-              top: badgePosition + 10,
-            },
-          ]}
-        />
-      ) : undefined}
-
       {customElement}
     </View>
   );

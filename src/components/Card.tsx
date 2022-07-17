@@ -6,7 +6,13 @@ import {
   ImageStyle,
   TextStyle,
 } from 'react-native';
-import {TouchableOpacity, View, Image, Colors} from 'react-native-ui-lib';
+import {
+  TouchableOpacity,
+  TouchableOpacityProps,
+  View,
+  Image,
+  Colors,
+} from 'react-native-ui-lib';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -23,13 +29,16 @@ import {MyContext, AppContext} from '../../App';
 interface CardProps {
   image?: string;
   text?: string;
-  onPress?: Function;
+  // onPress?: TouchableOpacityProps['onPress'];
+  onPress?: (customeObject?: Object) => void;
+  cover?: boolean;
   containerStyle?: StyleProp<ViewStyle>;
   imageStyle?: StyleProp<ImageStyle>;
   textStyle?: StyleProp<TextStyle>;
   customElement?: ReactElement;
   customeObject?: Object;
   animationFlag?: boolean;
+  isSelected?: boolean;
 }
 
 function Card({
@@ -42,12 +51,10 @@ function Card({
   customElement,
   customeObject,
   animationFlag,
+  isSelected,
+  cover = true,
 }: CardProps) {
   const posterURL = `https://image.tmdb.org/t/p/original${image}`;
-  const [isSelected, setIsSelected] = useState(false);
-
-  //Avoid useEffect hook on initial render
-  const didMount = useRef(false);
   const selectedOverlay = (
     <View center paddingT-50>
       <Image source={selectedIcon} style={styles.selectedIconStyle} />
@@ -75,56 +82,22 @@ function Card({
     scale.value = withRepeat(withSpring(1), 3, true);
   }, []);
 
-  useEffect(() => {
-    if (didMount.current) {
-      onPress?.(customeObject);
-    } else {
-      didMount.current = true;
-    }
-  }, [isSelected]);
+  const userOnPress = () => {
+    onPress?.(customeObject);
+  };
 
   return (
     <View style={[containerStyle, {}]} center flexS>
-      {customeObject ? (
-        <>
-          {isSelected ? (
-            <TouchableOpacity onPress={() => setIsSelected(!isSelected)}>
-              <Image
-                source={{uri: posterURL}}
-                cover={true}
-                style={imageStyle}
-                overlayColor={isSelected ? Colors.grey30 : undefined}
-                overlayIntensity={isSelected && Image.overlayIntensityType.LOW}
-                overlayType={isSelected ? 'TOP' : undefined}
-                customOverlayContent={isSelected ? selectedOverlay : undefined}
-              />
-            </TouchableOpacity>
-          ) : (
-            <Animated.View entering={FadeIn}>
-              <TouchableOpacity onPress={() => setIsSelected(!isSelected)}>
-                <Image
-                  source={{uri: posterURL}}
-                  cover={true}
-                  style={imageStyle}
-                />
-              </TouchableOpacity>
-            </Animated.View>
-          )}
-        </>
-      ) : (
-        <>
-          {isSelected ? (
-            <Animated.View exiting={FadeOut}>
-              <Image source={{uri: posterURL}} style={imageStyle} />
-            </Animated.View>
-          ) : (
-            <Animated.View style={[reanimatedStyle]}>
-              <Image source={{uri: posterURL}} style={imageStyle} />
-            </Animated.View>
-          )}
-        </>
-      )}
-
+      <TouchableOpacity onPress={userOnPress}>
+        <Image
+          source={{uri: posterURL}}
+          cover={cover}
+          style={imageStyle}
+          overlayColor={isSelected ? Colors.grey30 : undefined}
+          overlayType={isSelected ? 'TOP' : undefined}
+          customOverlayContent={isSelected ? selectedOverlay : undefined}
+        />
+      </TouchableOpacity>
       <View style={styles.contentContainer}>{customElement}</View>
     </View>
   );

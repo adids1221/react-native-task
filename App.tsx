@@ -9,8 +9,7 @@ import Stack from './src/components/Stack';
 const api = createApiClient();
 
 export type AppContext = {
-  movies: Movie[];
-  selectedMovies: Movie[];
+  movies: MyMovie[];
   selectedMoviesNumber: number;
   stackSize: number;
   totalResults: number;
@@ -19,12 +18,15 @@ export type AppContext = {
   currPage: number;
 };
 
+export interface MyMovie extends Movie {
+  isSelected?: boolean;
+}
+
 export const MyContext = React.createContext<AppContext | undefined>(undefined);
 
 export default class App extends React.Component<{}, AppContext> {
   state: AppContext = {
     movies: [],
-    selectedMovies: [],
     selectedMoviesNumber: 0,
     stackSize: 0,
     totalResults: 0,
@@ -39,18 +41,18 @@ export default class App extends React.Component<{}, AppContext> {
 
   fetchData = async () => {
     const {results, total_results, total_pages} = await api.getMovies();
-    // console.log(
-    //   `total res: ${total_results} || res len: ${results.length} || total pages: ${total_pages}`,
-    // );
     let {currResults} = this.state;
+    const myMovieRes: MyMovie[] = results.slice(
+      0,
+      currResults + results.length,
+    );
     this.setState({
       totalResults: total_results,
       totalPages: total_pages,
-      movies: results.slice(0, currResults + results.length),
+      movies: myMovieRes,
       currResults: currResults + results.length,
       currPage: 1,
     });
-    // console.log(this.state.movies.length);
   };
 
   loadMoreDate = async () => {
@@ -62,11 +64,6 @@ export default class App extends React.Component<{}, AppContext> {
       }
       const enrichmentMovies: any = results;
       movies = [...movies, ...enrichmentMovies];
-      // console.log(
-      //   `movies len: ${movies.length} || res len: ${
-      //     results.length
-      //   } || page: ${currPage + 1}`,
-      // );
       this.setState({
         totalResults: totalResults,
         movies: movies,
@@ -78,30 +75,25 @@ export default class App extends React.Component<{}, AppContext> {
 
   componentDidUpdate(_: {}, previousState) {}
 
-  selectMovie = (movie: Movie) => {
-    const movieId = movie.id;
-    let {selectedMovies} = this.state;
-    if (_.findIndex(selectedMovies, movie => movie.id === movieId) != -1) {
-      selectedMovies = _.filter(selectedMovies, movie => movie.id != movieId);
-    } else {
-      selectedMovies.push(movie);
+  selectMovie = (movie: MyMovie) => {
+    const movieId = movie?.id;
+    let {selectedMoviesNumber, movies} = this.state;
+    const movieIndex = _.findIndex(movies, movie => movie.id === movieId);
+    if (movieIndex != -1 && movie.isSelected === true) {
+      movie.isSelected = false;
+      selectedMoviesNumber -= 1;
+    } else if (movieIndex != -1) {
+      movie.isSelected = true;
+      selectedMoviesNumber += 1;
     }
     this.setState({
-      selectedMovies: selectedMovies,
-      selectedMoviesNumber: selectedMovies.length,
-    });
-  };
-
-  clearSelectedMovies = () => {
-    this.setState({
-      selectedMovies: [],
-      selectedMoviesNumber: 0,
+      movies: movies,
+      selectedMoviesNumber: selectedMoviesNumber,
     });
   };
 
   render() {
-    const {movies, selectedMovies, selectedMoviesNumber, stackSize} =
-      this.state;
+    const {movies, selectedMoviesNumber, stackSize} = this.state;
     return (
       <View flex useSafeArea>
         <MyContext.Provider value={this.state}>
@@ -113,9 +105,10 @@ export default class App extends React.Component<{}, AppContext> {
                   onPress={this.selectMovie}
                   onEndReached={this.loadMoreDate}
                 />
-
                 <Stack
-                  items={selectedMovies}
+                  items={_.filter(movies, function (m) {
+                    return m.isSelected === true;
+                  })}
                   onPress={this.selectMovie}
                   imageStyle={styles.stackImage}
                 />

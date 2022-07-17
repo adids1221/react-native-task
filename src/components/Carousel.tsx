@@ -9,12 +9,12 @@ import {
 import {FlatList, StyleSheet, StyleProp, ViewStyle} from 'react-native';
 import Card from './Card';
 import Content from './Content';
-import {MyContext, AppContext} from '../../App';
+import {MyContext, AppContext, MyMovie} from '../../App';
 interface CarosuelProps {
   items?: Array<any>;
   image?: string;
   text?: string;
-  onPress?: Function;
+  onPress?: (customeObject?: Object) => {};
   onEndReached?: Function;
   style?: StyleProp<ViewStyle>;
   customElement?: React.ReactElement;
@@ -56,6 +56,12 @@ function Carousel({
         ref={flatlistRef}
         contentContainerStyle={{alignItems: 'flex-start'}}
         renderItem={({item: movie}) => {
+          const paragraphs = [
+            movie.overview,
+            movie.release_date,
+            movie.vote_average,
+          ];
+          const titles = ['Overview: ', 'Release Date: ', 'Score: '];
           return (
             <View style={[styles.conatiner]} center marginT-30 marginH-40>
               <Card
@@ -63,9 +69,12 @@ function Carousel({
                 customeObject={movie}
                 image={movie.poster_path}
                 onPress={onPress}
+                isSelected={movie.isSelected}
                 customElement={
                   <Content
                     original_title={movie.original_title}
+                    paragraphs={paragraphs}
+                    paragraphsTitles={titles}
                     overview={movie.overview}
                     release_date={movie.release_date}
                     vote_average={movie.vote_average}

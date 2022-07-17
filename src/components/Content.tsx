@@ -3,11 +3,14 @@ import {StyleProp, ViewStyle} from 'react-native';
 import {Text, Button, Colors, View} from 'react-native-ui-lib';
 
 interface ContentProps {
-  title;
-  text;
-  onPress;
-  style;
-  customElement;
+  original_title?: string;
+  overview?: string;
+  release_date?: string;
+  vote_average?: string;
+  style?: StyleProp<ViewStyle>;
+  paragraphs?: string[];
+  paragraphsTitles?: string[];
+  onPress?: () => void;
 }
 
 function Content({
@@ -16,18 +19,17 @@ function Content({
   release_date,
   vote_average,
   style,
-}: {
-  original_title: string;
-  overview: string;
-  release_date: string;
-  vote_average: string;
-  style: StyleProp<ViewStyle>;
-}) {
+  paragraphs,
+  paragraphsTitles,
+  onPress,
+}: ContentProps) {
   const [textShown, setTextShown] = useState(false);
-  const totalStars = 5;
-  const gainedStars = 3;
-
   useEffect(() => {}, [textShown]);
+
+  const onContentPress = () => {
+    setTextShown(!textShown);
+    onPress?.();
+  };
 
   return (
     <View style={style}>
@@ -35,6 +37,15 @@ function Content({
         {original_title}
       </Text>
       <Text text80 margin-10 numberOfLines={textShown ? undefined : 2}>
+        {/* {paragraphs?.map((p, index) => {
+          <Text center>
+            {paragraphsTitles?.[index]}
+            {p}
+          </Text>;
+          {
+            ('\n');
+          }
+        })} */}
         <Text center>{overview}</Text>
         {'\n'}
         <Text center marginT-5>
@@ -46,7 +57,7 @@ function Content({
         </Text>
       </Text>
       <Button
-        onPress={() => setTextShown(!textShown)}
+        onPress={onContentPress}
         center
         marginT-6
         label={textShown ? 'Read less' : 'Read more'}
